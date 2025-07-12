@@ -1,4 +1,5 @@
 const Approvisionnement = require("../models/Approvisonnement");
+const ApprovisionnementProduit = require("../models/ApprovisionnementProduit");
 const Stock = require("../models/Stock");
 const asyncHandler = require("express-async-handler");
 const Fournisseur = require("../models/Fournisseur");
@@ -6,16 +7,12 @@ const Article = require("../models/Article");
 
 exports.findApprovisionnement = asyncHandler(async (req, res)=> {
     const result = await Approvisionnement.findAll({
-        include: [{
-        model: Article,
-        as: 'article',
-        attributes: ['id', 'article'] // ne pas inclure toute la table si inutile
-        },
-        {
-        model: Fournisseur,
-        as: 'fournisseur',
-        attributes: ['id', 'nom'] // ne pas inclure toute la table si inutile
-        }]
+        include: [
+            {
+                model: Fournisseur,
+                as: 'fournisseur',
+                attributes: ['id', 'nom'] 
+            }]
     });
 
     if(result) {
@@ -26,27 +23,38 @@ exports.findApprovisionnement = asyncHandler(async (req, res)=> {
 })
 
 exports.createApprovisionnement = asyncHandler(async (req, res)=> {
-    const {articleId,fournisseurId,prixUnitaire,qte} = req.body;
+    try{
+        const {numeroAchat,fournisseurId,etat} = req.body;
 
-    const stockProudit = await Stock.findOne({ where: {articleId} })
-
-    if(stockProudit)
-    {
-        const result = await Approvisionnement.create({articleId,fournisseurId,prixUnitaire,qte});
-        const newStock = Number(stockProudit.stock) + Number(qte);
-
-        await Stock.update(
-            { stock : newStock },
-            { where: { id : stockProudit.id } }
-        )
+        const result = await Approvisionnement.create({numeroAchat,fournisseurId,etat});
 
         if(result) {
-            res.status(200).json("Approvisionement inserer !");          
-        } else {
-            res.status(401).json('Erreur lors de la recuperation !');
+            res.status(200).json({msg:"Approvisionement inserer !", data: result});          
         }
+    }catch(error){
+        res.status(500).json({ message: "Erreur d'insertion d'approvisionnement", error: error.message });
     }
 })
+
+exports.createProduitAchat = asyncHandler(async (req, res) => {
+    try{
+        const {id,produitAchat} = req.body;
+ 
+        const achat = await Approvisionnement.findByPk(id);
+        if (!achat) return res.status(404).json({message: "achat non trouver"});
+
+        const produitAchatToCreate = produitAchat.map(p => ({
+            ...p,
+            approvisionnementId: achat.id
+        }));
+
+        await ApprovisionnementProduit.bulkCreate(produitAchatToCreate);
+        return res.status(201).json({ message: "Produit Achat inserer !" });
+
+    }catch(error){
+        res.status(500).json({ message: "Erreur d'insertion de produit d'approvisionnement", error: error.message });
+    }
+});
 
 exports.findById = asyncHandler(async (req, res) => {
     const result = await Approvisionnement.findByPk(req.params.id);
