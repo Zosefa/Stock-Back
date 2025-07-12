@@ -1,5 +1,6 @@
 # Ignorer les dépendances
 /node_modules
+/public
 
 # Fichiers sensibles
 .env
