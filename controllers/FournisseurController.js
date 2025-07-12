@@ -12,40 +12,52 @@ exports.findFournisseur = asyncHandler(async (req, res)=> {
 })
 
 exports.createFournisseur = asyncHandler(async (req, res)=> {
-    const {nom,siege,contact} = req.body;
-    const result = await Fournisseur.create({nom,siege,contact});
+    try{
+        const {numFournisseur,nom,siege,contact} = req.body;
+        const result = await Fournisseur.create({numFournisseur,nom,siege,contact});
 
-    if(result) {
-        res.status(200).json("Fournisseur creer !");          
-    } else {
-        res.status(401).json('Erreur lors de la recuperation !');
+        if(result) {
+            res.status(200).json({ message: "Fournisseur creer !", data: result.id });          
+        } else {
+            res.status(401).json('Erreur lors de la recuperation !');
+        }
+    }catch(error){
+        res.status(500).json({message: "error de creation de fournisseur" + error.message})
     }
 })
 
 exports.updateFournisseur = asyncHandler(async (req, res)=> {
-    const { nom,siege,contact } = req.body;
-    const id = req.params.id;
-    const [result] = await Fournisseur.update(
-        { nom,siege,contact },
-        { where: { id } }
-    );
+    try{
+        const { nom,siege,contact } = req.body;
+        const id = req.params.id;
+        const [result] = await Fournisseur.update(
+            { nom,siege,contact },
+            { where: { id } }
+        );
 
-    if(result) {
-        res.status(200).json("Fournisseur modifier!");       
-    } else {
-        res.status(401).json('Une erreur s\'est profuite!');
-    }
+        if(result) {
+            res.status(200).json("Fournisseur modifier!");       
+        } else {
+            res.status(401).json('Une erreur s\'est profuite!');
+        }
+    }catch(error){
+        res.status(500).json({message: "error de la modification de fournisseur" + error.message})
+    }  
 })
 
 exports.deleteFournisseur = asyncHandler(async (req, res)=> {
-    const id = req.params.id;
-    const result = await Fournisseur.destroy(
-        { where: { id } }
-    );
+    try {
+        const id = req.params.id;
+        const result = await Fournisseur.destroy(
+            { where: { id } }
+        );
 
-    if(result > 0) {
-        res.status(200).json("Fournisseur supprimer!");       
-    } else {
-        res.status(401).json('Une erreur s\'est profuite!');
+        if(result > 0) {
+            res.status(200).json("Fournisseur supprimer!");       
+        } else {
+            res.status(401).json('Une erreur s\'est profuite!');
+        }
+    } catch (error) {
+        res.status(500).json({message: "error de suppression de fournisseur" + error.message})   
     }
 })

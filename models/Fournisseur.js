@@ -2,6 +2,10 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
 
 const Fournisseur = sequelize.define('Fournisseur', {
+  numFournisseur: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
   nom: {
     type: DataTypes.STRING,
     allowNull: false,

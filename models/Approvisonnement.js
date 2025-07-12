@@ -1,16 +1,11 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db');
-const Article = require('./Article');
 const Fournisseur = require('./Fournisseur');
 
 const Approvisionnement = sequelize.define('Approvisionnement', {
-   articleId: { 
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: Article,
-      key: 'id',
-    },
+  numeroAchat:{
+    type: DataTypes.STRING,
+    allowNull: false
   },
   fournisseurId: { 
     type: DataTypes.INTEGER,
@@ -20,22 +15,13 @@ const Approvisionnement = sequelize.define('Approvisionnement', {
       key: 'id',
     },
   },
-   prixUnitaire: {
-    type: DataTypes.FLOAT,
-    allowNull: false,
-  },
-  qte: {
-    type: DataTypes.INTEGER,
+   etat: {
+    type: DataTypes.ENUM('EN ATTANTE, VALIDER, REJETER, RECEPTIONNER'),
     allowNull: false,
   }
 }, {
   tableName: 'approvisionnement',
   timestamps: true,
-});
-
-Approvisionnement.belongsTo(Article, {
-  foreignKey: 'articleId',
-  as: 'article',
 });
 
 Approvisionnement.belongsTo(Fournisseur, {
